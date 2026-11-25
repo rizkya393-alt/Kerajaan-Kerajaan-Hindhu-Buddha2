@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Petualangan Candi Nusantara</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;height:100%;background:#1b1030;overflow:hidden;font-family:"Trebuchet MS","Segoe UI",Verdana,sans-serif}
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:0 0;overflow:hidden;background:#2a1a4a;color:#2b1a0a}
+.page{position:absolute;inset:0;display:none;padding:34px 60px;opacity:0;transform:translateX(40px);transition:opacity .4s,transform .4s;
+background:radial-gradient(circle at 85% 12%,#ffe27a 0 60px,transparent 62px),linear-gradient(180deg,#7fd0ff 0%,#c9f0ff 45%,#ffe8b0 62%,#5fae5a 62.1%,#3f8a46 100%)}
+.page.on{display:block}.page.show{opacity:1;transform:none}
+.page::before{content:"";position:absolute;left:0;right:0;bottom:0;height:170px;pointer-events:none;
+background:linear-gradient(135deg,transparent 48%,#b9854a 49% 100%) 80px 100%/180px 120px no-repeat,linear-gradient(225deg,transparent 48%,#b9854a 49% 100%) 260px 100%/180px 120px no-repeat,linear-gradient(135deg,transparent 48%,#a1713b 49% 100%) 1000px 100%/140px 90px no-repeat,linear-gradient(225deg,transparent 48%,#a1713b 49% 100%) 1140px 100%/140px 90px no-repeat;opacity:.55}
+h1,h2{margin:0;color:#4a1f00;text-shadow:0 3px 0 #fff8}
+h1{font-size:62px}h2{font-size:42px}
+.btn{font:700 28px inherit;font-family:inherit;border:0;border-radius:22px;padding:16px 34px;background:#ff8a1f;color:#fff;box-shadow:0 7px 0 #b34e00;cursor:pointer;min-height:64px;transition:transform .1s}
+.btn:active{transform:translateY(5px);box-shadow:0 2px 0 #b34e00}
+.btn.g{background:#2e8b3d;box-shadow:0 7px 0 #1a5a25}.btn.b{background:#6a3fd0;box-shadow:0 7px 0 #3d2285}
+.card{background:#fffbea;border:5px solid #4a1f00;border-radius:26px;padding:22px 30px;box-shadow:0 8px 0 #0003}
+.center{text-align:center}
+#cover{padding:0;background:#1b1030 url(./assets/cover.png) center/contain no-repeat;cursor:pointer}
+#cover::before{display:none}
+#cover .go{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#fff;font-size:22px;text-shadow:0 2px 6px #000;animation:bl 1.6s infinite}
+@keyframes bl{50%{opacity:.35}}
+#musicBtn{position:absolute;right:18px;top:14px;z-index:50;width:60px;height:60px;border-radius:50%;border:4px solid #4a1f00;background:#fff;font-size:30px;cursor:pointer}
+#hud{position:absolute;left:60px;right:100px;top:18px;display:flex;gap:20px;align-items:center;font-weight:700;font-size:24px;color:#4a1f00}
+#bar{flex:1;height:26px;background:#fff;border:4px solid #4a1f00;border-radius:16px;overflow:hidden}
+#bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff8a1f,#ffd23f);transition:width .5s}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:30px}
+.menu .btn{height:150px;font-size:34px;border-radius:28px}
+input{font:700 34px inherit;font-family:inherit;width:560px;padding:16px;border:5px solid #4a1f00;border-radius:20px;text-align:center;user-select:text}
+.opt{display:block;width:100%;text-align:left;margin:9px 0;font-size:25px;padding:13px 20px;border:4px solid #4a1f00;border-radius:18px;background:#fff;cursor:pointer;font-family:inherit;color:#2b1a0a;min-height:60px}
+.opt.ok{background:#8ee28e}.opt.no{background:#ff9a9a}
+.tabs{display:flex;gap:10px;margin:62px 0 12px}.tabs .btn{font-size:22px;padding:10px 18px;min-height:52px;box-shadow:0 5px 0 #3d2285}
+.tabs .btn.cur{background:#ff8a1f;box-shadow:0 5px 0 #b34e00}
+.info{font-size:25px;line-height:1.4}.info b{color:#a02c00}
+table{width:100%;border-collapse:collapse;font-size:25px}td,th{border-bottom:3px dashed #b9854a;padding:6px 10px;text-align:left}
+.back{position:absolute;left:60px;bottom:26px}
+#fb{position:absolute;left:0;right:0;bottom:0;padding:14px 60px;font-size:25px;font-weight:700;display:none;z-index:5;align-items:center;justify-content:space-between}
+#fb.ok{background:#bff0bf;display:flex}#fb.no{background:#ffc8c8;display:flex}
+.pop{animation:pop .5s}@keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.1)}100%{transform:none}}
+img.dev{width:260px;height:260px;object-fit:cover;border-radius:50%;border:6px solid #4a1f00;background:#fff}
+</style>
+</head>
+<body>
+<div id="stage">
+<button id="musicBtn" aria-label="Musik">🔊</button>
+
+<section class="page" id="cover"><div class="go">mulai</div></section>
+
+<section class="page center" id="name">
+<h1 style="margin-top:120px">Siapa namamu, Petualang?</h1>
+<p style="font-size:26px;font-weight:700">Nama dipakai untuk peringkat di perangkat ini.</p>
+<div style="margin-top:50px"><input id="uname" maxlength="20" placeholder="Ketik namamu" autocomplete="off"></div>
+<div style="margin-top:50px"><button class="btn g" onclick="saveName()">Lanjut</button></div>
+</section>
+
+<section class="page menu center" id="menu">
+<h1 style="margin-top:20px">Petualangan Candi Nusantara</h1>
+<p style="font-size:26px;font-weight:700;margin:6px">Halo, <span id="hi"></span>! Pilih menu:</p>
+<div class="grid">
+<button class="btn" onclick="go('learn')">📜 Belajar</button>
+<button class="btn g" onclick="go('howto')">⚔️ Bermain</button>
+<button class="btn b" onclick="go('sum')">📝 Rangkuman</button>
+<button class="btn b" onclick="showRank();go('rank')">🏆 Peringkat</button>
+<button class="btn g" onclick="go('about')">🎯 Tujuan Belajar</button>
+<button class="btn" onclick="go('dev')">👩‍🏫 Pengembang</button>
+</div></section>
+
+<section class="page" id="learn">
+<h2>Belajar: Kerajaan Hindu-Buddha</h2>
+<div class="tabs" id="tabs"></div>
+<div class="card info" id="lbody" style="height:410px;overflow:auto"></div>
+<button class="btn b back" onclick="go('menu')">⬅ Menu</button></section>
+
+<section class="page center" id="howto">
+<h1 style="margin-top:50px">Misi Petualangan</h1>
+<div class="card info" style="text-align:left;margin-top:20px">
+Kamu menjelajah 3 misi untuk menemukan harta Nusantara:<br>
+<b>Misi 1 – Gerbang Awal</b> (soal 1–3): masuknya pengaruh &amp; kerajaan awal.<br>
+<b>Misi 2 – Samudra &amp; Candi</b> (soal 4–6): Sriwijaya &amp; Mataram Kuno.<br>
+<b>Misi 3 – Puncak Nusantara</b> (soal 7–10): Singhasari, Majapahit &amp; akulturasi.<br>
+Jawaban benar = <b>+10 poin</b>. Kamu lulus misi bila benar minimal 2 soal. Misi gagal bisa diulang!</div>
+<div style="margin-top:24px"><button class="btn g" onclick="startMission(0)">Mulai Misi 1</button> <button class="btn b" onclick="go('menu')">⬅ Menu</button></div>
+</section>
+
+<section class="page" id="play">
+<div id="hud"><span id="mt"></span><div id="bar"><i></i></div><span id="sc"></span></div>
+<div class="card" style="margin-top:62px;height:150px;font-size:29px;font-weight:700" id="q"></div>
+<div id="opts" style="margin-top:8px"></div>
+<div id="fb"><span id="fbt"></span><button class="btn" id="nx" onclick="next()">Lanjut</button></div>
+</section>
+
+<section class="page center" id="mres">
+<h1 style="margin-top:110px" id="mrt"></h1>
+<p class="info" id="mrd" style="font-weight:700"></p>
+<div style="margin-top:40px"><button class="btn g" id="mrb"></button> <button class="btn b" onclick="go('menu')">⬅ Menu</button></div>
+</section>
+
+<section class="page" id="final">
+<h1 class="center" style="margin-top:10px" id="ft"></h1>
+<p class="center" style="font-size:30px;font-weight:700;margin:6px">Skor akhir: <span id="fs" style="font-size:52px;color:#a02c00"></span> / 100</p>
+<div class="card info" style="height:380px;overflow:auto;font-size:21px"><b>Kunci jawaban &amp; hasil:</b><table id="key"></table></div>
+<div class="center" style="margin-top:14px"><button class="btn g" onclick="startMission(0)">Main Lagi</button> <button class="btn b" onclick="showRank();go('rank')">🏆 Peringkat</button> <button class="btn" onclick="go('menu')">Menu</button></div>
+</section>
+
+<section class="page" id="sum">
+<h2>Rangkuman</h2>
+<div class="card info" style="margin-top:14px;height:500px;overflow:auto;font-size:22px">
+<table>
+<tr><th>Kerajaan</th><th>Intisari</th></tr>
+<tr><td><b>Kutai</b></td><td>Tertua (±abad ke-4), Kalimantan Timur. Mulawarman. Yupa.</td></tr>
+<tr><td><b>Tarumanegara</b></td><td>Jawa Barat. Purnawarman. Prasasti Ciaruteun; saluran air Sungai Gomati.</td></tr>
+<tr><td><b>Sriwijaya</b></td><td>Maritim Buddha, Palembang. Balaputradewa. Jaya: abad 7–11. Prasasti Kedukan Bukit.</td></tr>
+<tr><td><b>Mataram Kuno</b></td><td>Jawa Tengah. Sanjaya, Rakai Pikatan. Borobudur &amp; Prambanan.</td></tr>
+<tr><td><b>Singhasari</b></td><td>Ken Arok, Kertanegara. Candi Singhasari, Jago. Runtuh oleh Jayakatwang.</td></tr>
+<tr><td><b>Majapahit</b></td><td>Raden Wijaya, Hayam Wuruk, Gajah Mada (Sumpah Palapa). Kitab Negarakertagama. Runtuh ±1527.</td></tr>
+<tr><td><b>Akulturasi</b></td><td>Perpaduan budaya lokal &amp; Hindu-Buddha: candi, wayang, sastra, kalender, gotong royong, toleransi.</td></tr>
+</table></div>
+<button class="btn b back" onclick="go('menu')">⬅ Menu</button></section>
+
+<section class="page" id="rank">
+<h2>🏆 Papan Peringkat</h2>
+<div class="card info" style="margin-top:14px;height:460px;overflow:auto"><table id="rt"></table></div>
+<button class="btn b back" onclick="go('menu')">⬅ Menu</button></section>
+
+<section class="page center" id="dev">
+<h2>Pengembang</h2>
+<div style="margin-top:20px"><img class="dev" id="devimg" alt="Foto pengembang"></div>
+<h1 style="font-size:46px;margin-top:14px">Rizkya Syafira, M.Pd.</h1>
+<p style="font-size:30px;font-weight:700;margin:4px">SKB Kota Depok</p>
+<button class="btn b back" onclick="go('menu')">⬅ Menu</button></section>
+
+<section class="page" id="about">
+<h2>Tujuan Pembelajaran</h2>
+<div class="card info" style="margin-top:14px;height:500px;overflow:auto;font-size:23px">
+<b>Mata Pelajaran:</b> Sejarah Indonesia &nbsp; <b>Fase E / Kelas 10</b><br>
+<b>Unit:</b> Perkembangan Hindu-Buddha di Nusantara<br>
+<b>Subunit:</b> Kerajaan-Kerajaan Hindu-Buddha di Nusantara<br><br>
+Setelah belajar dan bermain, kamu mampu:
+<ul><li>Memahami proses masuknya pengaruh Hindu-Buddha ke Indonesia.</li>
+<li>Mengidentifikasi kehidupan politik, sosial, ekonomi, dan tokoh penting Kutai, Tarumanegara, Sriwijaya, Mataram Kuno, Singhasari, hingga Majapahit.</li>
+<li>Menganalisis wujud akulturasi &amp; peninggalan budaya yang masih bermanfaat bagi masyarakat Indonesia masa kini.</li></ul>
+<b>Cara belajar:</b> baca menu Belajar, ulas Rangkuman, lalu tantang dirimu di Bermain.</div>
+<button class="btn b back" onclick="go('menu')">⬅ Menu</button></section>
+</div>
+
+<script>
+var $=function(i){return document.getElementById(i)};
+var st=$('stage');
+function fit(){var s=Math.min(innerWidth/1280,innerHeight/720);st.style.transform='scale('+s+')';st.style.marginLeft=(-640*s)+'px';st.style.marginTop=(-360*s)+'px'}
+addEventListener('resize',fit);fit();
+
+var mem={};
+function sget(k){try{return localStorage.getItem(k)}catch(e){return mem[k]||null}}
+function sset(k,v){try{localStorage.setItem(k,v)}catch(e){mem[k]=v}}
+
+function aud(src,loop,vol){try{var a=new Audio(src);a.loop=!!loop;a.volume=vol||1;a.onerror=function(){};return a}catch(e){return {play:function(){return{catch:function(){}}},pause:function(){}}}}
+var bgm=aud('./assets/musiklatar.mp3',true,.35),sOk=aud('./assets/benar.mp3'),sNo=aud('./assets/salah.mp3');
+var musicOn=true;
+function playBgm(){if(musicOn){try{var p=bgm.play();if(p&&p.catch)p.catch(function(){})}catch(e){}}}
+$('musicBtn').onclick=function(e){e.stopPropagation();musicOn=!musicOn;$('musicBtn').textContent=musicOn?'🔊':'🔇';if(musicOn)playBgm();else bgm.pause()};
+function snd(a){try{a.currentTime=0;var p=a.play();if(p&&p.catch)p.catch(function(){})}catch(e){}}
+
+var cur=null;
+function go(id){
+ var n=$(id),o=cur?$(cur):null;
+ if(o){o.classList.remove('show');setTimeout(function(){if(cur!==o.id)o.classList.remove('on')},400)}
+ n.classList.add('on');setTimeout(function(){n.classList.add('show')},30);cur=id;
+ $('musicBtn').style.display=id==='cover'?'none':'block';
+}
+$('cover').onclick=function(){playBgm();go('name')};
+$('cover').style.backgroundImage="url(./assets/cover.png)";
+(function(){var im=$('devimg'),ex=['jpg','jpeg','png'],i=0;im.onerror=function(){i++;if(i<ex.length)im.src='./assets/pengembang.'+ex[i];else im.style.visibility='hidden'};im.src='./assets/pengembang.jpg'})();
+
+var user='';
+function saveName(){var v=$('uname').value.trim();if(!v){$('uname').style.borderColor='red';return}user=v;sset('pcn_user',v);$('hi').textContent=v;go('menu')}
+user=sget('pcn_user')||'';$('uname').value=user;$('hi').textContent=user;
+
+var K=[
+{n:'Kutai',r:'Raja: Kudungga (pendiri), Aswawarman, <b>Mulawarman</b> (paling terkenal, kaya dan dermawan).',j:'Abad ke-4 M di bawah Mulawarman; memberi sedekah 20.000 sapi kepada brahmana.',p:'Tujuh <b>Yupa</b> (tiang batu berhuruf Pallawa) di Muara Kaman, Kalimantan Timur.',m:'Tidak ada catatan pasti; diduga melemah akibat perubahan politik &amp; ekonomi, lalu menjadi bagian dari kerajaan lain. Kutai adalah kerajaan Hindu tertua di Nusantara.'},
+{n:'Tarumanegara',r:'Raja <b>Purnawarman</b> (abad ke-5), bergelar Wisnu.',j:'Pertanian maju dengan penggalian saluran Sungai Gomati dan Candrabhaga; perdagangan dengan India &amp; Tiongkok.',p:'Prasasti Ciaruteun, Kebon Kopi, Jambu, Pasir Awi, Muara Cianten, Tugu.',m:'Melemah setelah Purnawarman; sumber menyebut diserang/dikuasai Sriwijaya dan kemudian terpecah (Sunda &amp; Galuh).'},
+{n:'Sriwijaya',r:'<b>Dapunta Hyang Sri Jayanasa</b> (pendiri), Balaputradewa; pusat di Palembang.',j:'Abad 7–11. Kerajaan maritim Buddha, menguasai Selat Malaka; pusat pendidikan Buddha (I-Tsing).',p:'Prasasti Kedukan Bukit, Talang Tuo, Kota Kapur, Telaga Batu; Candi Muaro Jambi, Biaro Bahal.',m:'Serangan Chola (India, 1025), persaingan Singhasari &amp; Majapahit, pendangkalan sungai, lalu runtuh abad ke-13/14.'},
+{n:'Mataram Kuno',r:'<b>Sanjaya</b> (Hindu Syiwa), Rakai Panangkaran, Samaratungga, Rakai Pikatan, Balitung.',j:'Dinasti Sanjaya &amp; Syailendra; pertanian padi subur di Jawa Tengah; seni candi megah (abad 8–10).',p:'<b>Candi Borobudur</b>, Prambanan, Kalasan, Sewu, Dieng; Prasasti Canggal.',m:'Mpu Sindok memindahkan pusat ke Jawa Timur (±929) karena letusan Merapi/bencana &amp; ancaman; kemudian melemah.'},
+{n:'Singhasari',r:'<b>Ken Arok</b> (pendiri, 1222), Anusapati, <b>Kertanegara</b> (raja terbesar).',j:'Kertanegara menyatukan Nusantara (Ekspedisi Pamalayu) dan menolak tunduk pada Mongol.',p:'Candi Singhasari, Jago, Kidal, Jawi; Arca Prajnaparamita; Prasasti Mula Malurung.',m:'Diserang <b>Jayakatwang</b> dari Kediri (1292); Kertanegara gugur.'},
+{n:'Majapahit',r:'<b>Raden Wijaya</b> (pendiri, 1293), Jayanegara, Tribhuwana Tunggadewi, <b>Hayam Wuruk</b>; Mahapatih <b>Gajah Mada</b> (Sumpah Palapa).',j:'Abad 14 di Trowulan; wilayah luas, perdagangan ramai; Kitab Negarakertagama &amp; Sutasoma (Tantular: Bhinneka Tunggal Ika).',p:'Candi Tikus, Bajang Ratu, Penataran; Gapura Wringin Lawang; situs Trowulan; Kitab Pararaton.',m:'Perang Paregreg, perebutan takhta, lemahnya pengganti, dan berkembangnya kerajaan Islam; runtuh ±1527 (Girindrawardhana/Demak).'}];
+var tb=$('tabs');
+K.forEach(function(k,i){var b=document.createElement('button');b.className='btn b';b.textContent=k.n;b.onclick=function(){showK(i)};tb.appendChild(b)});
+function showK(i){var k=K[i];Array.prototype.forEach.call(tb.children,function(b,x){b.className='btn b'+(x===i?' cur':'')});
+ $('lbody').innerHTML='<h2 style="font-size:34px">Kerajaan '+k.n+'</h2>👑 <b>Raja:</b> '+k.r+'<br>🌟 <b>Masa kejayaan:</b> '+k.j+'<br>🏛️ <b>Peninggalan:</b> '+k.p+'<br>📉 <b>Kemunduran:</b> '+k.m}
+showK(0);
+
+var Q=[
+{q:'Pengaruh Hindu-Buddha masuk ke Nusantara terutama melalui...',o:['Perang penaklukan India','Jalur perdagangan dan pelayaran','Pembangunan benteng','Misi militer Tiongkok'],a:1},
+{q:'Bukti tertua kerajaan Hindu di Nusantara, yaitu Kutai, berupa...',o:['Prasasti Canggal','Candi Borobudur','Tujuh Yupa','Kitab Negarakertagama'],a:2},
+{q:'Raja Tarumanegara yang terkenal membangun saluran Sungai Gomati adalah...',o:['Mulawarman','Purnawarman','Sanjaya','Airlangga'],a:1},
+{q:'Sriwijaya menjadi kuat karena menguasai...',o:['Jalur perdagangan Selat Malaka','Hutan Kalimantan','Pegunungan Dieng','Pelabuhan Surabaya saja'],a:0},
+{q:'Candi Buddha terbesar peninggalan Dinasti Syailendra Mataram Kuno adalah...',o:['Prambanan','Penataran','Borobudur','Jago'],a:2},
+{q:'Mataram Kuno memindahkan pusat pemerintahan ke Jawa Timur pada masa...',o:['Rakai Pikatan','Mpu Sindok','Balitung','Samaratungga'],a:1},
+{q:'Raja terbesar Singhasari yang menjalankan Ekspedisi Pamalayu adalah...',o:['Ken Arok','Anusapati','Kertanegara','Jayakatwang'],a:2},
+{q:'Sumpah Palapa untuk menyatukan Nusantara diucapkan oleh...',o:['Hayam Wuruk','Gajah Mada','Raden Wijaya','Tribhuwana'],a:1},
+{q:'Kitab Negarakertagama yang menggambarkan Majapahit ditulis oleh...',o:['Mpu Prapanca','Mpu Tantular','Mpu Sindok','Mpu Kanwa'],a:0},
+{q:'Contoh akulturasi budaya Hindu-Buddha dengan budaya lokal yang masih ada kini adalah...',o:['Wayang kulit dan upacara adat','Mesin cetak','Kereta api','Pesawat terbang'],a:0}];
+var M=[[0,3],[3,6],[6,10]],MT=['Misi 1: Gerbang Awal','Misi 2: Samudra & Candi','Misi 3: Puncak Nusantara'];
+var mi=0,qi=0,score=0,mc=0,locked=false,ans=[];
+function startMission(m){if(m===0){score=0;ans=[]}mi=m;qi=M[m][0];mc=0;go('play');showQ()}
+function showQ(){locked=false;var q=Q[qi];$('mt').textContent=MT[mi]+' ('+(qi-M[mi][0]+1)+'/'+(M[mi][1]-M[mi][0])+')';
+ $('sc').textContent='⭐ '+score;$('bar').firstChild.style.width=(qi/Q.length*100)+'%';
+ $('q').textContent=(qi+1)+'. '+q.q;$('fb').className='';
+ var h='';q.o.forEach(function(t,i){h+='<button class="opt" data-i="'+i+'">'+'ABCD'[i]+'. '+t+'</button>'});$('opts').innerHTML=h;
+ Array.prototype.forEach.call($('opts').children,function(b){b.onclick=function(){pick(+b.dataset.i,b)}})}
+function pick(i,b){if(locked)return;locked=true;var q=Q[qi],ok=i===q.a;ans[qi]=i;
+ var bs=$('opts').children;bs[q.a].classList.add('ok');if(!ok)b.classList.add('no');
+ if(ok){score+=10;mc++;snd(sOk);bs[q.a].classList.add('pop')}else snd(sNo);
+ $('sc').textContent='⭐ '+score;
+ $('fbt').textContent=ok?'✅ Benar! +10 poin':'❌ Belum tepat. Jawaban: '+'ABCD'[q.a]+'. '+q.o[q.a];
+ $('fb').className=ok?'ok':'no';$('nx').textContent=(qi+1===M[mi][1])?'Selesai Misi':'Lanjut'}
+function next(){if(qi+1<M[mi][1]){qi++;showQ();return}endMission()}
+function endMission(){var tot=M[mi][1]-M[mi][0],pass=mc>=2;$('bar').firstChild.style.width=(M[mi][1]/Q.length*100)+'%';
+ $('mrt').textContent=pass?'🎉 '+MT[mi]+' Berhasil!':'💥 '+MT[mi]+' Gagal';
+ $('mrd').textContent='Benar '+mc+' dari '+tot+'. Skor sementara: '+score+(pass?'':'. Butuh minimal 2 benar. Coba lagi!');
+ var b=$('mrb');
+ if(!pass){b.textContent='Ulangi Misi';b.onclick=function(){score-=mc*10;startMission(mi)}}
+ else if(mi<2){b.textContent='Lanjut Misi '+(mi+2);b.onclick=function(){startMission(mi+1)}}
+ else{b.textContent='Lihat Hasil Akhir';b.onclick=finish}
+ go('mres')}
+function finish(){var t=score;$('fs').textContent=t;
+ $('ft').textContent=t>=80?'🏆 Hebat! Sejarawan Muda!':t>=60?'👍 Bagus! Petualang Handal':'💪 Ayo belajar lagi!';
+ var h='';Q.forEach(function(q,i){var ok=ans[i]===q.a;h+='<tr><td>'+(ok?'✅':'❌')+' '+(i+1)+'</td><td>'+q.q+'<br><b>Kunci: '+'ABCD'[q.a]+'. '+q.o[q.a]+'</b></td></tr>'});
+ $('key').innerHTML=h;
+ var r=JSON.parse(sget('pcn_rank')||'[]');r.push({n:user,s:t,d:new Date().toLocaleDateString('id-ID')});r.sort(function(a,b){return b.s-a.s});r=r.slice(0,20);sset('pcn_rank',JSON.stringify(r));
+ go('final')}
+function showRank(){var r=JSON.parse(sget('pcn_rank')||'[]'),h='<tr><th>#</th><th>Nama</th><th>Skor</th><th>Tanggal</th></tr>';
+ if(!r.length)h+='<tr><td colspan="4">Belum ada skor. Mainkan misi dulu!</td></tr>';
+ r.forEach(function(x,i){var e=document.createElement('div');e.textContent=x.n;h+='<tr><td>'+(i<3?['🥇','🥈','🥉'][i]:i+1)+'</td><td>'+e.innerHTML+'</td><td>'+x.s+'</td><td>'+x.d+'</td></tr>'});
+ $('rt').innerHTML=h}
+go('cover');
+</script>
+</body>
+</html>
